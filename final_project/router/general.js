@@ -29,39 +29,100 @@ public_users.post("/register", (req,res) => {
 public_users.get('/',function (req, res) {
   //Write your code here
     // Send JSON response with formatted books data
-    res.send(JSON.stringify(books,null,4));
+    getAllBooks((err,data) => {
+      if (err) {
+        res.status(404).send({error: err.message});
+      } else {
+        res.send(JSON.stringify(data,null,4));
+      }
+    });
+  
+});
+function getAllBooks(callback){
+  // Retrieve all book's details
+
+  if (books) {
+    callback(null,books);
+  } else {
+    error = new Error ("Book not found.")
+    callback(error,null);
+  };
+}
+// Get book details based on ISBN
+public_users.get('/isbn/:isbn',(req, res) => {// Retrieve the isbn parameter from the request URL and send the corresponding book's details
+  const isbn = req.params.isbn;
+  //callback function
+  getAllBooksByIsbn(isbn,(err,data) => {
+    if (err) {
+      res.status(404).send({error: err.message});
+    } else {
+      res.send(JSON.stringify(data,null,4));
+    }
+  });
 });
 
-// Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
-  //Write your code here
-    // Retrieve the isbn parameter from the request URL and send the corresponding book's details
-    const isbn = req.params.isbn;
-    let foundBook= Object.keys(books).find(key => books[key].ISBN === isbn)
-    if (foundBook) {
-      res.send(JSON.stringify(books[foundBook],null,4));
+function getAllBooksByIsbn(isbn,callback){
+  //callback function 
+
+    let foundkey= Object.keys(books).find(key => books[key].ISBN === isbn);
+    if (foundkey) {
+      callback(null,books[foundkey]);
     } else {
-      res.send("Book not found.");
-    }
- });
+      error = new Error ("Book not found.")
+      callback(error,null);
+    };
+  }
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
     // Retrieve the author parameter from the request URL and send the corresponding book's details
     // if there is redundancy in author return all of them
     const author = req.params.author;
-    let foundBooks= Object.values(books).filter(book=> book.author === author);
-    res.send(JSON.stringify(foundBooks,null,4));
+    // callback function
+    getAllBooksByAuthor(author,(err,data) => {
+      if (err) {
+        res.status(404).send({error: err.message});
+      } else {
+        res.send(JSON.stringify(data,null,4));
+      }
+    });
 });
+
+function getAllBooksByAuthor(author,callback){
+    // callback function
+  let foundBooks= Object.values(books).filter(book=> book.author === author);
+  if (foundBooks) {
+    callback(null,foundBooks);
+  } else {
+    error = new Error ("Book not found.")
+    callback(error,null);
+  };
+}
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
     // Retrieve the title parameter from the request URL and send the corresponding book's details
     // if there is redundancy in title return all of them
-    const title = req.params.title;
-    let foundBooks= Object.values(books).filter(book=> book.title === title);
-    res.send(JSON.stringify(foundBooks,null,4));
+    const author = req.params.title;
+    getAllBooksByTitle(author,(err,data) => {
+      if (err) {
+        res.status(404).send({error: err.message});
+      } else {
+        res.send(JSON.stringify(data,null,4));
+      }
+    });
 });
+
+function getAllBooksByTitle(title,callback){
+
+  let foundBooks= Object.values(books).filter(book=> book.title === title);
+  if (foundBooks) {
+    callback(null,foundBooks);
+  } else {
+    error = new Error ("Book not found.")
+    callback(error,null);
+  };
+}
 
 //  Get book review
 public_users.get('/review/:isbn',function (req, res) {
